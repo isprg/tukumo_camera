@@ -1,4 +1,3 @@
-from genericpath import exists
 import os
 # import csv
 
@@ -17,16 +16,6 @@ IMAGE_DIR = 'images'
 #         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
 #         'hair drier', 'toothbrush']  # class names
 
-class ImageOnModel:
-    model_name = ''
-    image_path = ''
-    front_image = None
-
-    def __init__(self, name):
-        self.model_name = name
-        self.image_path = os.path.join(IMAGE_DIR, name + '.png')
-        self.front_image = cv2.imread(self.image_path, -1)
-
 
 def print_object(xmin,ymin,xmax,ymax,confidence,class_id):
     width = xmax - xmin
@@ -41,11 +30,11 @@ def print_object(xmin,ymin,xmax,ymax,confidence,class_id):
     print(f"高さ:{height: >3}")
 
 def read_iom(model):
-    iom_datas = []
+    iom_datas = {}
     for name in model.names:
         image_path = os.path.join(IMAGE_DIR, name + '.png')
         if os.path.isfile(image_path):
-            iom_datas.append(ImageOnModel(name))
+            iom_datas[name] = cv2.imread(image_path, -1)
     return iom_datas
 
 def mix_png(back, front4, center_pos, mag, model_width, model_height):
@@ -101,7 +90,7 @@ def main():
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-    cap.set(cv2.CAP_PROP_FPS, 24)
+    cap.set(cv2.CAP_PROP_FPS, 30)
     ret, frame = cap.read()
 
     while cap.isOpened():
@@ -109,27 +98,28 @@ def main():
             mixed_iamge = frame.copy()
             mixed_iamge = cv2.flip(mixed_iamge, 1)
             results = model(mixed_iamge)  # 画像パスを設定し、物体検出を行う
-            objects = results.xyxy[0].cpu().numpy()  # 検出結果を取得
+            objects = results.xyxy[0].numpy()  # 検出結果を取得
             # print(objects)
 
             for object in objects:
                 class_id = int(object[5])
-                for data in iom_datas:
-                    if model.names[class_id] == data.model_name:
-                        xmin = int(object[0])
-                        ymin = int(object[1])
-                        xmax = int(object[2])
-                        ymax = int(object[3])
-                        confidence = object[4]
-                        model_width = xmax - xmin
-                        model_height = ymax - ymin
-                        xc = int(xmin + model_width * 0.5)
-                        yc = int(ymin + model_height * 0.5)
-                        # print_object(xmin,ymin,xmax,ymax,confidence,class_id)
-                        pos = (xc, yc)
+                model_name = model.names[class_id]
+                if model_name in iom_datas:
+                    xmin = int(object[0])
+                    ymin = int(object[1])
+                    xmax = int(object[2])
+                    ymax = int(object[3])
+                    # confidence = object[4]
+                    model_width = xmax - xmin
+                    model_height = ymax - ymin
+                    xc = int(xmin + model_width * 0.5)
+                    yc = int(ymin + model_height * 0.5)
+                    # print_object(xmin,ymin,xmax,ymax,confidence,class_id)
+                    pos = (xc, yc)
+                    front_image = iom_datas[model_name]
 
-                        mixed_iamge = mix_png(mixed_iamge, data.front_image, pos, 1.0, model_width, model_height)
-                        # mixed_iamge = putSprite_mask(mixed_iamge, front_image, (xmin, ymin))
+                    mixed_iamge = mix_png(mixed_iamge, front_image, pos, 1.0, model_width, model_height)
+                    # mixed_iamge = putSprite_mask(mixed_iamge, front_image, (xmin, ymin))
 
             # cv2.imshow("source", frame)  # 処理前の映像表示
             cv2.imshow("mixed_iamge", mixed_iamge)  # 処理後の映像表示
