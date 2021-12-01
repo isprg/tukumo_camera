@@ -106,8 +106,9 @@ def main():
 
     while cap.isOpened():
         if ret:
-            mixed = frame.copy()
-            results = model(frame)  # 画像パスを設定し、物体検出を行う
+            mixed_iamge = frame.copy()
+            mixed_iamge = cv2.flip(mixed_iamge, 1)
+            results = model(mixed_iamge)  # 画像パスを設定し、物体検出を行う
             objects = results.xyxy[0].cpu().numpy()  # 検出結果を取得
             # print(objects)
 
@@ -127,11 +128,11 @@ def main():
                         # print_object(xmin,ymin,xmax,ymax,confidence,class_id)
                         pos = (xc, yc)
 
-                        mixed = mix_png(mixed, data.front_image, pos, 1.0, model_width, model_height)
-                        # mixed = putSprite_mask(mixed, front_image, (xmin, ymin))
+                        mixed_iamge = mix_png(mixed_iamge, data.front_image, pos, 1.0, model_width, model_height)
+                        # mixed_iamge = putSprite_mask(mixed_iamge, front_image, (xmin, ymin))
 
             # cv2.imshow("source", frame)  # 処理前の映像表示
-            cv2.imshow("mixed", mixed)  # 処理後の映像表示
+            cv2.imshow("mixed_iamge", mixed_iamge)  # 処理後の映像表示
 
         if cv2.waitKey(delay) & 0xFF == ord('q'):
             break
