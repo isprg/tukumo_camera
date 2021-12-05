@@ -3,10 +3,8 @@ import os
 import torch
 import cv2
 
-from common import ImageOnModel, ObjectWithImage
+from frontimage import ImageOnModel, ObjectWithImage, IMAGE_DIR
 
-IMAGE_DIR = 'images'
-MODEL_DIR = 'models'
 CAMERA_ID = 0
 DELAY = 1
 
@@ -20,12 +18,8 @@ def read_iom(model):
 
 def main():
     # モデルの読み込み
-    model = torch.hub.load("ultralytics/yolov5", "yolov5s6", pretrained=True)
-    # model = torch.hub.load(os.path.join("./", MODEL_DIR, ""), 'yolov5s6', source='local', pretrained=True)  # # ローカルのモデル
-    # path = os.path.join(os.getcwd(), MODEL_DIR, 'yolov5s6.pt')
-    # print(path)
-    # model = torch.jit.load(path)
-    # print(model.names)  # 検出できる物体の種類
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s6', pretrained=True)   #ネット上のモデル
+    # model = torch.hub.load('.', 'custom', path='pt/yolov5s6', source='local') #ローカルのモデル
 
     # モデルと画像を対応付け
     iom_datas = read_iom(model)
@@ -33,8 +27,8 @@ def main():
     # キャプチャの初期値
     cap = cv2.VideoCapture(CAMERA_ID, cv2.CAP_DSHOW)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
     cap.set(cv2.CAP_PROP_FPS, 30)
     ret, frame = cap.read()
 
@@ -54,6 +48,7 @@ def main():
                     # owi_data.print_object()
                     frame_mixed = owi_data.mix_image(frame_mixed, 1.0)
 
+            # frame_mixed = cv2.resize(frame_mixed, (1920, 1080))
             # cv2.imshow("source", frame)  # 処理前の映像表示
             cv2.imshow("mixed_iamge", frame_mixed)  # 処理後の映像表示
 
