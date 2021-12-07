@@ -18,6 +18,7 @@ class ObjectWithImage():
         self.iom = iom_data #対応するImageOnModelクラスのインスタンス
         self.width = self.object[2] - self.object[0]
         self.height = self.object[3] - self.object[1]
+        self.confidence = self.object[4]
         self.x = self.object[0] + self.width * 0.5
         self.y = self.object[1] + self.height * 0.5
 

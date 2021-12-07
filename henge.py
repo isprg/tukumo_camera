@@ -19,7 +19,7 @@ def read_iom(model):
 def main():
     # モデルの読み込み
     model = torch.hub.load('ultralytics/yolov5', 'yolov5s6', pretrained=True)   # ネット上のモデル
-    # model = torch.hub.load('.', 'custom', path='pt/yolov5s6', source='local') # ローカルのモデル
+    # model = torch.hub.load('./yolov5', 'custom', path='pt/yolov5s6', source='local') # ローカルのモデル
 
     # モデルと画像を対応付け
     iom_datas = read_iom(model)
