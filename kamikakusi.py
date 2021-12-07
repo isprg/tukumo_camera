@@ -3,7 +3,7 @@ import os
 import torch
 import cv2
 
-from common import ImageOnModel, ObjectWithImage
+from frontimage import ImageOnModel, ObjectWithImage
 
 IMAGE_DIR = 'images'
 CAMERA_ID = 0
