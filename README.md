@@ -1,3 +1,3 @@
-## pipenv移行バージョン
+## 実行方法
 
-仕様が違うので，`絶対に`mainブランチにmergeしないこと．
+`pipenv run main`
