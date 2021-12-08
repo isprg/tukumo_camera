@@ -7,6 +7,11 @@ from frontimage import ImageOnModel, ObjectWithImage, IMAGE_DIR
 
 CAMERA_ID = 0
 DELAY = 1
+GST_STR = 'nvarguscamerasrc \
+    ! video/x-raw(memory:NVMM), width=3280, height=2464, format=(string)NV12, framerate=(fraction)30/1 \
+    ! nvvidconv ! video/x-raw, width=(int)1920, height=(int)1080, format=(string)BGRx \
+    ! videoconvert \
+    ! appsink'
 
 def read_iom(model):
     iom_datas = {}
@@ -25,7 +30,11 @@ def main():
     iom_datas = read_iom(model)
 
     # キャプチャの初期値
-    cap = cv2.VideoCapture(CAMERA_ID, cv2.CAP_DSHOW)
+    if os.name == 'nt':
+        cap = cv2.VideoCapture(CAMERA_ID, cv2.CAP_DSHOW)
+    else:
+        cap = cv2.VideoCapture(GST_STR, cv2.CAP_GSTREAMER)
+
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
